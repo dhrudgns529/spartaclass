@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
+    <title>페이지 한번 만들어보기</title>
+
+    <meta property="og:title" content="내꺼임!"/>
+    <meta property="og:description" content="신기신기대박신기"/>
+    <meta property="og:image" content="{{ url_for('static', filename='ogimage.jpg') }}" />
+    <style>
+        .wrap{
+            width: 620px;
+            margin: 10px auto 10px;
+            border: 2px solid black;
+            border-radius: 10px;
+            padding: 20px 20px 20px 20px;
+        }
+        .image{
+            background-image: url("https://ww.namu.la/s/62d12a6059873bda1b0bded9bd1f2fbf629c01ba5116b27454886b54d45c08aeff4aac41a5599a3c49a303114555f52f0529e29c64ed8fe655999c7715fe182f900094c4a9e1d400071ae40f69871c6a");
+            background-size: 500px;
+            background-position: center;
+            width: 580px;
+            height: 200px;
+            border: 1px solid black;
+
+        }
+        .main{
+            padding-top: 25px;
+            padding-bottom: 10px;
+        }
+        .btn{
+            background: #5882FA;
+            width: 100px;
+            display: block;
+            margin: auto;
+        }
+        .box{
+            margin: 5px 5px 5px 5px;
+        }
+        .ra{
+            color: #5882FA;
+            float: right;
+        }
+    </style>
+    <script>
+        $(document).ready(function () {
+            q1()
+            order_listing()
+        });
+        function q1() {
+            $.ajax({
+                type: "GET",
+                url: "http://spartacodingclub.shop/sparta_api/rate",
+                data: {},
+                success: function (response) {
+                    let temp_html = `<div id="r" class="ra">환율(1$) : ${response['rate']}</div>`
+                    $('#r').append(temp_html)
+                }
+            })
+        }
+        var selectbox = function (value){
+            $('#changeinput').val(value);
+        }
+        function order_listing() {
+            $.ajax({
+                type: "GET",
+                url: "/order",
+                data: {},
+                success: function (response) {
+                    let orders = response['all_orders']
+                    for (let i = 0; i<orders.length; i ++){
+                        let name = orders[i]['name']
+                        let number = orders[i]['number']
+                        let addr = orders[i]['addr']
+                        let addr1 = orders[i]['addr1']
+                        let addr2 = orders[i]['addr2']
+                        let phone = orders[i]['phone']
+                        console.log(name,number,addr,addr1,addr2,phone)
+                        let temp_html = `<tr>
+                                          <th scope="row">${name}</th>
+                                          <td>${number}</td>
+                                          <td>${addr}</td>
+                                          <td>${addr1}</td>
+                                          <td>${addr2}</td>
+                                          <td>${phone}</td>
+                                        </tr>`
+                        $('#table1').append(temp_html)
+                        }
+                    }
+                })
+            }
+        function openZipSearch() {
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    $('#addr').val(data.zonecode); // 우편번호 (5자리)
+                    $('#addr1').val(data.address);
+                    $('#addr2').val(data.buildingName);
+                }
+            }).open();
+        }
+        function order() {
+            let name = $('#name').val()
+            let number = $('#number').val()
+            let addr = $('#addr').val()
+            let addr1 = $('#addr1').val()
+            let addr2 = $('#addr2').val()
+            let phone = $('#phone').val()
+            if (number == "수량") {
+                alert("수량을 선택해주세요");
+            } else if (isNaN(phone)){
+                alert("연락처는 올바르게 입력해주세요")
+            }
+            else{
+                // 주문하기 API 연결
+                $.ajax({
+                    type: "POST",
+                    url: "/order",
+                    data: {name_give:name,number_give:number,addr_give:addr,addr1_give:addr1,addr2_give:addr2,phone_give:phone},
+                    success: function (response) { // 성공하면
+                        alert(response["msg"]);
+                        console.log(name,number,addr,addr1,addr2,phone)
+                        window.location.reload();
+                    }
+                })
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="image"></div>
+        <div class="main">
+            <h2>볼펜을 팝니다 <sp style="font-size: small">가격: 1,000원/개</sp></h2>
+            이 상품은 모나미 볼펜입니다.
+        </div>
+        <div id="r"></div>
+        <div class="main">
+            <h2>주문하기</h2>
+            <div class="box">이 름 : <input type="text" id="name" name="name" required minlength="4" maxlength="10" size="40"></div>
+            <div class="box">수 량 :
+                <select id="number" onchange="selectbox(this.value)" style="width: 100px">
+                    <option value="수량">수량</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+            <div class="box">우편번호 : <input  type="text" id="addr" style="width:100px; height:26px;" />
+            <button type="button" style="width:60px; height:28px; background: white" onclick="openZipSearch()">검색</button><br></div>
+            <div class="box">주소 : <input type="text" id="addr1" style="width:300px; height:30px;" readonly /><br></div>
+            <div class="box">상세 : <input type="text" id="addr2" style="width:300px; height:30px;" /></div>
+
+            <div class="box">연락처: <input type="text" id="phone" name="name" required minlength="4" maxlength="11" size="40"></div>
+        </div>
+            <button onclick="order()" type="button" class="btn">주문하기</button>
+        </div>
+    <div>
+		<table class="table" id="table">
+		  <thead>
+		    <tr>
+		      <th scope="col">이름</th>
+		      <th scope="col">수량</th>
+		      <th scope="col">우편번호</th>
+		      <th scope="col">주소</th>
+		      <th scope="col">상세</th>
+		      <th scope="col">연락처</th>
+		    </tr>
+		  </thead>
+		  <tbody id="table1">
+		  </tbody>
+		</table>
+    </div>
+</body>
+
+</html>
+
